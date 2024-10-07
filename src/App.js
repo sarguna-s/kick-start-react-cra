@@ -1,21 +1,24 @@
 import "./index.css";
-import { Footer } from "./components/footer";
-import { Header } from "./components/header";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/home";
-import AboutPage from "./pages/about";
+import Employee from "./pages/home";
+import { AddEmployee } from "./pages/add-employee";
+import { UpdateEmployee } from "./pages/update-employee";
+import {
+  ROUTE_HOME,
+  ROUTE_ADD_EMPLOYEE,
+  ROUTE_UPDATE_EMPLOYEE,
+} from "./utils/routes";
 
 const App = () => {
   return (
     <main>
-      <Header />
       <BrowserRouter>
         <Routes>
-          <Route path="/" Component={HomePage} />
-          <Route path="/about" Component={AboutPage} />
+          <Route Component={Employee} path={ROUTE_HOME} />
+          <Route Component={AddEmployee} path={ROUTE_ADD_EMPLOYEE} />
+          <Route Component={UpdateEmployee} path={ROUTE_UPDATE_EMPLOYEE} />
         </Routes>
       </BrowserRouter>
-      <Footer />
     </main>
   );
 };

@@ -27,9 +27,7 @@ export const ListEmployee = ({
       <p>
         Employee Address: <b>{address}</b>
       </p>
-      <p>
-        Employee Name: <b>{name}</b>
-      </p>
+
       <button onClick={onUpdate.bind(null, id)}>Edit</button>
       <button onClick={onDelete.bind(null, id)}>Delete</button>
     </li>
