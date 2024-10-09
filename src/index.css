@@ -31,11 +31,6 @@ code {
   gap: 14px;
 }
 
-.detail-image {
-  width: 100px;
-  aspect-ratio: 1;
-}
-
 li {
   list-style: none;
   border: 1px solid blueviolet;

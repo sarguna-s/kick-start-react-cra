@@ -1,6 +1,6 @@
 import "./index.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Employee from "./pages/home";
+import Home from "./pages/home";
 import { AddEmployee } from "./pages/add-employee";
 import { UpdateEmployee } from "./pages/update-employee";
 import {
@@ -14,7 +14,7 @@ const App = () => {
     <main>
       <BrowserRouter>
         <Routes>
-          <Route Component={Employee} path={ROUTE_HOME} />
+          <Route Component={Home} path={ROUTE_HOME} />
           <Route Component={AddEmployee} path={ROUTE_ADD_EMPLOYEE} />
           <Route Component={UpdateEmployee} path={ROUTE_UPDATE_EMPLOYEE} />
         </Routes>

@@ -150,8 +150,6 @@ export const UpdateEmployee = () => {
     setEmployee((prev) => ({ ...prev, [name]: value }));
   };
 
-  console.log(">>>>>>>>>>>>>>>>>>>: errData", errData);
-
   return (
     <form className="name-input" onSubmit={updateEmployee}>
       <input
@@ -172,13 +170,7 @@ export const UpdateEmployee = () => {
         {DESIGNATION.map(renderOption)}
       </select>
       <label className="error-text">{errDesignation}</label>
-      <select
-        type="text"
-        value={gender}
-        name="gender"
-        placeholder="Gender"
-        onChange={onChange}
-      >
+      <select type="text" value={gender} name="gender" onChange={onChange}>
         {GENDER.map(renderOption)}
       </select>
       <label className="error-text">{errGender}</label>

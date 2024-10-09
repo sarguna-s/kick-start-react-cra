@@ -1,14 +1,9 @@
-export const ListEmployee = ({
-  id,
-  name,
-  designation,
-  gender,
-  dateOfBirth,
-  profileImage,
-  address,
-  onUpdate,
-  onDelete,
-}) => {
+import "./index.css";
+
+export const ListEmployee = ({ employee, onUpdate, onDelete }) => {
+  const { id, name, designation, gender, dateOfBirth, profileImage, address } =
+    employee;
+
   return (
     <li key={id}>
       <img src={profileImage} alt={name} />

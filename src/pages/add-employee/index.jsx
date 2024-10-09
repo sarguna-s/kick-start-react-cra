@@ -165,6 +165,7 @@ export const AddEmployee = () => {
         onChange={onChange}
       />
       <label className="error-text">{errDateOfBirth}</label>
+
       <input
         type="text"
         value={profileImage}
@@ -173,6 +174,7 @@ export const AddEmployee = () => {
         onChange={onChange}
       />
       <label className="error-text">{errProfileImage}</label>
+
       <input
         type="text"
         value={address}
@@ -182,7 +184,7 @@ export const AddEmployee = () => {
       />
       <label className="error-text">{errAddress}</label>
       <button onClick={addEmployee} type="submit">
-        Add Employee
+        submit
       </button>
     </form>
   );
