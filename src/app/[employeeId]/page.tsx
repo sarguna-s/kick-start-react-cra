@@ -4,7 +4,7 @@ import "./index.css";
 import { useRouter, useParams } from "next/navigation";
 import { ROUTE_HOME } from "utils/routes";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { IEmployee } from "app/home/page";
+import { IEmployee } from "app/page";
 
 const GENDER = ["Male", "Female", "Transgender", "Others"];
 

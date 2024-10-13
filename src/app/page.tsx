@@ -2,9 +2,9 @@
 
 import { useState, useMemo, ChangeEvent } from "react";
 import "./index.css";
-import { ListEmployee } from "../../components/list-employee";
+import { ListEmployee } from "../components/list-employee";
 import { useRouter } from "next/navigation";
-import { ROUTE_ADD_EMPLOYEE, routeUpdateEmployee } from "../../utils/routes";
+import { ROUTE_ADD_EMPLOYEE, routeUpdateEmployee } from "../utils/routes";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 
