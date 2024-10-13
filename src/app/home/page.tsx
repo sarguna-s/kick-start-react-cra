@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo, ChangeEvent } from "react";
+import { useState, useMemo, ChangeEvent } from "react";
 import "./index.css";
 import { ListEmployee } from "../../components/list-employee";
 import { useRouter } from "next/navigation";
 import { ROUTE_ADD_EMPLOYEE, routeUpdateEmployee } from "../../utils/routes";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import Link from "next/link";
 
-interface IEmployee {
+export interface IEmployee {
   id: string;
   name: string;
   dateOfBirth: string;
@@ -16,9 +18,30 @@ interface IEmployee {
 }
 
 const Home = () => {
-  const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [search, setSearch] = useState("");
   const { push } = useRouter();
+  const queryClient = useQueryClient();
+
+  const {
+    data: employees = [],
+    refetch: refreshUsers,
+    isLoading,
+    isFetching,
+  } = useQuery<IEmployee[]>({
+    queryKey: ["employees"],
+    queryFn: fetchEmployees,
+  });
+
+  const { mutate: removeEmployee } = useMutation({
+    mutationFn: deleteEmployee,
+    onSuccess: (_, employeeId) => {
+      /* Removing from existing cache */
+      queryClient.setQueryData<IEmployee[]>(["employees"], (oldEmployees) =>
+        oldEmployees?.filter(({ id }) => id !== employeeId)
+      );
+      // queryClient.invalidateQueries({ queryKey: ["employees"] });
+    },
+  });
 
   const filteredEmployees = useMemo(
     () =>
@@ -37,19 +60,13 @@ const Home = () => {
     [employees, search]
   );
 
-  const onNavAdd = () => push(ROUTE_ADD_EMPLOYEE);
-
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  const fetchEmployees = async () => {
+  async function fetchEmployees() {
     const response = await fetch(
       "https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees"
     );
-    const employees = await response.json();
-    setEmployees(employees);
-  };
+
+    return await response.json();
+  }
 
   const updateEmployee = (id: string) => push(routeUpdateEmployee(id));
 
@@ -58,28 +75,31 @@ const Home = () => {
     setSearch(value);
   };
 
-  const deleteEmployee = async (id: string) => {
+  async function deleteEmployee(employeeId: string) {
     const response = await fetch(
-      `https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees/${id}`,
+      `https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees/${employeeId}`,
       {
         method: "DELETE",
       }
     );
 
-    const employee = await response.json();
-    if (employee) setEmployees(employees.filter((emp) => emp.id !== id));
-  };
+    return (await response.json()) as IEmployee;
+  }
 
   const renderEmployee = (employee: IEmployee) => (
     <ListEmployee
       key={employee.id}
       employee={employee}
-      onDelete={deleteEmployee}
+      onDelete={removeEmployee}
       onUpdate={updateEmployee}
     />
   );
 
-  return (
+  return isLoading ? (
+    <h1>Loading....</h1> /* : isFetching ? (
+    <h1>Data is Fetching....</h1>
+  ) */
+  ) : (
     <section className="details">
       <h1>Employee Management</h1>
       <input
@@ -88,7 +108,9 @@ const Home = () => {
         onChange={onChangeSearch}
       />
 
-      <button onClick={onNavAdd}>Add Employee</button>
+      <Link href={ROUTE_ADD_EMPLOYEE}>
+        <button>Add Employee</button>
+      </Link>
       <ul>{filteredEmployees.map(renderEmployee)}</ul>
     </section>
   );

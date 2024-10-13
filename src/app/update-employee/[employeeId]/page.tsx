@@ -3,6 +3,8 @@ import { ChangeEvent, MouseEvent, FormEvent, useEffect, useState } from "react";
 import "./index.css";
 import { useRouter, useParams } from "next/navigation";
 import { ROUTE_HOME } from "utils/routes";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IEmployee } from "app/home/page";
 
 const GENDER = ["Male", "Female", "Transgender", "Others"];
 
@@ -54,6 +56,29 @@ const UpdateEmployee = () => {
     errAddress,
     isClicked,
   } = errData;
+
+  const queryClient = useQueryClient();
+
+  const { mutate: putEmployee } = useMutation({
+    mutationFn: updateEmployee,
+    onSuccess: (updatedEmployee) => {
+      if (updatedEmployee) {
+        /* Updating from existing cache */
+        queryClient.setQueryData<IEmployee[]>(
+          ["employees"],
+          (oldEmployees = []) => {
+            return oldEmployees?.map((oldEmployee) =>
+              oldEmployee.id === updatedEmployee.id
+                ? updatedEmployee
+                : oldEmployee
+            );
+          }
+        );
+
+        replace(ROUTE_HOME);
+      }
+    },
+  });
 
   useEffect(() => {
     if (isClicked) onValidate();
@@ -121,13 +146,13 @@ const UpdateEmployee = () => {
     return errData;
   };
 
-  const updateEmployee = async (
+  async function updateEmployee(
     e: MouseEvent<HTMLButtonElement> | FormEvent<HTMLFormElement>
-  ) => {
+  ) {
     e.preventDefault();
     const { isValid } = onValidate();
     if (isValid) {
-      await fetch(
+      const response = await fetch(
         `https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees/${employeeId}`,
         {
           method: "PUT",
@@ -137,9 +162,12 @@ const UpdateEmployee = () => {
           body: JSON.stringify(employee),
         }
       );
-      replace(ROUTE_HOME);
+
+      const data = (await response.json()) as IEmployee;
+
+      return data;
     }
-  };
+  }
 
   const renderOption = (option: string) => (
     <option value={option} key={option}>
@@ -156,7 +184,7 @@ const UpdateEmployee = () => {
   };
 
   return (
-    <form className="name-input" onSubmit={updateEmployee}>
+    <form className="name-input" onSubmit={putEmployee}>
       <input
         type="text"
         value={name}
@@ -197,7 +225,7 @@ const UpdateEmployee = () => {
         onChange={onChange}
       />
       <label className="error-text">{errAddress}</label>
-      <button onClick={updateEmployee} type="submit">
+      <button onClick={putEmployee} type="submit">
         Update Employee
       </button>
     </form>

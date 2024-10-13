@@ -4,6 +4,8 @@ import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from "react";
 import "./index.css";
 import { useRouter } from "next/navigation";
 import { ROUTE_HOME } from "../../utils/routes";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { IEmployee } from "app/home/page";
 
 const GENDER = ["Male", "Female", "Transgender", "Others"];
 
@@ -41,6 +43,7 @@ const AddEmployee = () => {
   const [employee, setEmployee] = useState(DEFAULT_EMPLOYEE);
   const [errData, setErrData] = useState(DEFAULT_ERR_STATE);
   const { replace } = useRouter();
+  const queryClient = useQueryClient();
 
   const { name, designation, dateOfBirth, gender, profileImage, address } =
     employee;
@@ -58,6 +61,24 @@ const AddEmployee = () => {
   useEffect(() => {
     if (isClicked) onValidate();
   }, [isClicked, employee]); //eslint-disable-line
+
+  const { mutate: insertEmployee } = useMutation({
+    mutationFn: addEmployee,
+    onSuccess: (data) => {
+      if (data) {
+        /* Adding to existing cache */
+        queryClient.setQueryData<IEmployee[]>(
+          ["employees"],
+          (oldEmployees = []) => {
+            oldEmployees?.push(data);
+            return oldEmployees;
+          }
+        );
+
+        replace(ROUTE_HOME);
+      }
+    },
+  });
 
   const onValidate = () => {
     let errData = {
@@ -109,22 +130,25 @@ const AddEmployee = () => {
     return errData;
   };
 
-  const addEmployee = async (
+  async function addEmployee(
     e: MouseEvent<HTMLButtonElement> | FormEvent<HTMLFormElement>
-  ) => {
+  ) {
     e.preventDefault();
     const { isValid } = onValidate();
     if (isValid) {
-      await fetch("https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(employee),
-      });
-      replace(ROUTE_HOME);
+      const response = await fetch(
+        "https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(employee),
+        }
+      );
+      return (await response.json()) as IEmployee;
     }
-  };
+  }
 
   const renderOption = (option: string) => (
     <option value={option} key={option}>
@@ -141,7 +165,7 @@ const AddEmployee = () => {
   };
 
   return (
-    <form className="name-input" onSubmit={addEmployee}>
+    <form className="name-input" onSubmit={insertEmployee}>
       <input
         type="text"
         value={name}
@@ -184,7 +208,7 @@ const AddEmployee = () => {
         onChange={onChange}
       />
       <label className="error-text">{errAddress}</label>
-      <button onClick={AddEmployee} type="submit">
+      <button onClick={insertEmployee} type="submit">
         submit
       </button>
     </form>
