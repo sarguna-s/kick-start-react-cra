@@ -1,15 +1,24 @@
-import { useState, useEffect, useMemo } from "react";
+"use client";
+
+import { useState, useEffect, useMemo, ChangeEvent } from "react";
 import "./index.css";
 import { ListEmployee } from "../../components/list-employee";
-import { useNavigate } from "react-router";
+import { useRouter } from "next/navigation";
 import { ROUTE_ADD_EMPLOYEE, routeUpdateEmployee } from "../../utils/routes";
 
-const DEFAULT_EMPLOYEES = [];
+interface IEmployee {
+  id: string;
+  name: string;
+  dateOfBirth: string;
+  designation: string;
+  address: string;
+  gender: string;
+}
 
 const Home = () => {
-  const [employees, setEmployees] = useState(DEFAULT_EMPLOYEES);
+  const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [search, setSearch] = useState("");
-  const navigate = useNavigate();
+  const { push } = useRouter();
 
   const filteredEmployees = useMemo(
     () =>
@@ -28,7 +37,7 @@ const Home = () => {
     [employees, search]
   );
 
-  const onNavAdd = () => navigate(ROUTE_ADD_EMPLOYEE);
+  const onNavAdd = () => push(ROUTE_ADD_EMPLOYEE);
 
   useEffect(() => {
     fetchEmployees();
@@ -42,25 +51,26 @@ const Home = () => {
     setEmployees(employees);
   };
 
-  const updateEmployee = async (id) => navigate(routeUpdateEmployee(id));
+  const updateEmployee = (id: string) => push(routeUpdateEmployee(id));
 
-  const onChangeSearch = (e) => {
+  const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setSearch(value);
   };
 
-  const deleteEmployee = async (id) => {
+  const deleteEmployee = async (id: string) => {
     const response = await fetch(
       `https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees/${id}`,
       {
         method: "DELETE",
       }
     );
+
     const employee = await response.json();
     if (employee) setEmployees(employees.filter((emp) => emp.id !== id));
   };
 
-  const renderEmployee = (employee) => (
+  const renderEmployee = (employee: IEmployee) => (
     <ListEmployee
       key={employee.id}
       employee={employee}
@@ -77,10 +87,10 @@ const Home = () => {
         value={search}
         onChange={onChangeSearch}
       />
+
       <button onClick={onNavAdd}>Add Employee</button>
       <ul>{filteredEmployees.map(renderEmployee)}</ul>
     </section>
   );
 };
-
 export default Home;

@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from "react";
 import "./index.css";
-import { useNavigate, useParams } from "react-router";
+import { useRouter } from "next/navigation";
 import { ROUTE_HOME } from "../../utils/routes";
 
 const GENDER = ["Male", "Female", "Transgender", "Others"];
@@ -35,11 +37,10 @@ const DEFAULT_ERR_STATE = {
   isClicked: false,
 };
 
-export const UpdateEmployee = () => {
+const AddEmployee = () => {
   const [employee, setEmployee] = useState(DEFAULT_EMPLOYEE);
   const [errData, setErrData] = useState(DEFAULT_ERR_STATE);
-  const navigate = useNavigate();
-  const { employeeId } = useParams();
+  const { replace } = useRouter();
 
   const { name, designation, dateOfBirth, gender, profileImage, address } =
     employee;
@@ -57,18 +58,6 @@ export const UpdateEmployee = () => {
   useEffect(() => {
     if (isClicked) onValidate();
   }, [isClicked, employee]); //eslint-disable-line
-
-  useEffect(() => {
-    fetchEmployee();
-  }, []); //eslint-disable-line
-
-  const fetchEmployee = async () => {
-    const response = await fetch(
-      `https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees/${employeeId}`
-    );
-    const employeeData = await response.json();
-    setEmployee(employeeData);
-  };
 
   const onValidate = () => {
     let errData = {
@@ -120,38 +109,39 @@ export const UpdateEmployee = () => {
     return errData;
   };
 
-  const updateEmployee = async (e) => {
+  const addEmployee = async (
+    e: MouseEvent<HTMLButtonElement> | FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
     const { isValid } = onValidate();
     if (isValid) {
-      await fetch(
-        `https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees/${employeeId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(employee),
-        }
-      );
-      navigate(ROUTE_HOME, { replace: true });
+      await fetch("https://66fe30af2b9aac9c997ab3b2.mockapi.io/employees", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(employee),
+      });
+      replace(ROUTE_HOME);
     }
   };
 
-  const renderOption = (option) => (
+  const renderOption = (option: string) => (
     <option value={option} key={option}>
       {option}
     </option>
   );
 
-  const onChange = ({ target }) => {
+  const onChange = ({
+    target,
+  }: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { value, name } = target;
 
     setEmployee((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
-    <form className="name-input" onSubmit={updateEmployee}>
+    <form className="name-input" onSubmit={addEmployee}>
       <input
         type="text"
         value={name}
@@ -160,17 +150,11 @@ export const UpdateEmployee = () => {
         placeholder="Employee Name"
       />
       <label className="error-text">{errName}</label>
-      <select
-        type="text"
-        value={designation}
-        name="designation"
-        placeholder="Designation"
-        onChange={onChange}
-      >
+      <select value={designation} name="designation" onChange={onChange}>
         {DESIGNATION.map(renderOption)}
       </select>
       <label className="error-text">{errDesignation}</label>
-      <select type="text" value={gender} name="gender" onChange={onChange}>
+      <select value={gender} name="gender" onChange={onChange}>
         {GENDER.map(renderOption)}
       </select>
       <label className="error-text">{errGender}</label>
@@ -182,6 +166,7 @@ export const UpdateEmployee = () => {
         onChange={onChange}
       />
       <label className="error-text">{errDateOfBirth}</label>
+
       <input
         type="text"
         value={profileImage}
@@ -190,6 +175,7 @@ export const UpdateEmployee = () => {
         onChange={onChange}
       />
       <label className="error-text">{errProfileImage}</label>
+
       <input
         type="text"
         value={address}
@@ -198,9 +184,10 @@ export const UpdateEmployee = () => {
         onChange={onChange}
       />
       <label className="error-text">{errAddress}</label>
-      <button onClick={updateEmployee} type="submit">
-        Update Employee
+      <button onClick={AddEmployee} type="submit">
+        submit
       </button>
     </form>
   );
 };
+export default AddEmployee;
